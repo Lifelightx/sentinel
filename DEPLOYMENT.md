@@ -271,4 +271,3 @@ docker run -d --name sentinel-agent -e SERVER_ID=node-1 -e NATS_URL=nats://MASTE
 
 ---
 
-The whole point is simple deployment. If it takes seventeen flags and a spiritual ritual, we’ve failed.
