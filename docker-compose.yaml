@@ -1,6 +1,35 @@
 services:
   nats:
-    image: nats
+    image: nats:2.10-alpine
     container_name: sentinel-nats
     ports:
       - "4222:4222"
+      - "8222:8222" # Monitor port
+
+  master:
+    build:
+      context: .
+      target: master
+    container_name: sentinel-master
+    depends_on:
+      - nats
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  agent:
+    build:
+      context: .
+      target: agent
+    container_name: sentinel-agent
+    depends_on:
+      - nats
+    env_file:
+      - .env
+    environment:
+      - SERVER_ID=main-agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Required to monitor Docker stats
+    restart: unless-stopped
