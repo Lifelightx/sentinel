@@ -1,0 +1,28 @@
+{{define "layout"}}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Sentinel</title>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="/" class="brand">Sentinel</a>
+</header>
+
+<main class="content">
+
+  {{if eq .Page "dashboard"}}
+    {{template "dashboard" .Data}}
+  {{else if eq .Page "server"}}
+    {{template "server" .Data}}
+  {{end}}
+
+</main>
+
+</body>
+</html>
+{{end}}

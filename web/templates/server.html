@@ -1,0 +1,64 @@
+{{define "server"}}
+<div class="page-head">
+  <div>
+    <h1>{{index . "serverId"}}</h1>
+    <p class="muted">Container health and resource usage</p>
+  </div>
+
+  <a href="/" class="btn">← Back</a>
+</div>
+
+<div class="stats-bar">
+
+  <div class="stat-box">
+    <span class="label">Status</span>
+    <span class="value {{if eq (index . "status") "online"}}green-text{{else}}red-text{{end}}">
+      {{index . "status"}}
+    </span>
+  </div>
+
+  <div class="stat-box">
+    <span class="label">CPU</span>
+    <span class="value">
+      {{printf "%.1f" (index . "cpu")}}%
+    </span>
+  </div>
+
+  <div class="stat-box">
+    <span class="label">RAM</span>
+    <span class="value">
+      {{printf "%.1f" (index . "ram")}}%
+    </span>
+  </div>
+
+  <div class="stat-box">
+    <span class="label">Disk</span>
+    <span class="value">
+      {{printf "%.1f" (index . "disk")}}%
+    </span>
+  </div>
+
+</div>
+
+<div class="panel">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>ID</th>
+        <th>State</th>
+        <th>Health</th>
+        <th>CPU</th>
+        <th>Memory</th>
+        <th>Mem %</th>
+      </tr>
+    </thead>
+
+    <tbody
+      hx-get="/partials/containers?serverId={{index . "serverId"}}"
+      hx-trigger="load, every 5s"
+      hx-swap="innerHTML">
+    </tbody>
+  </table>
+</div>
+{{end}}

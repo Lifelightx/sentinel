@@ -1,0 +1,45 @@
+{{define "container_rows.html"}}
+{{range .}}
+<tr>
+
+  <td>{{.Name}}</td>
+
+  <td class="muted">{{.ID}}</td>
+
+  <td>
+    {{if eq .State "running"}}
+      <span class="badge green">running</span>
+    {{else if eq .State "exited"}}
+      <span class="badge red">exited</span>
+    {{else if eq .State "created"}}
+      <span class="badge yellow">created</span>
+    {{else}}
+      <span class="badge gray">{{.State}}</span>
+    {{end}}
+  </td>
+
+  <td>
+    {{if eq .Health "healthy"}}
+      <span class="badge green">healthy</span>
+    {{else if eq .Health "unhealthy"}}
+      <span class="badge red">unhealthy</span>
+    {{else if eq .Health "starting"}}
+      <span class="badge yellow">starting</span>
+    {{else}}
+      <span class="badge gray">none</span>
+    {{end}}
+  </td>
+
+  <td>{{printf "%.1f" .CPUPercentage}}%</td>
+
+  <td>{{printf "%.1f" .MemoryMB}} MB</td>
+
+  <td>{{printf "%.1f" .MemoryPercentage}}%</td>
+
+</tr>
+{{else}}
+<tr>
+  <td colspan="7" class="empty">No containers found</td>
+</tr>
+{{end}}
+{{end}}

@@ -54,15 +54,40 @@ func (s *MemoryStore) GetAll() []map[string]any{
 		}
 		out = append(out, map[string]any{
 			"serverId":id,
-			"hostname":metric.Hostname,
+			"hostName":metric.Hostname,
 			"cpu":metric.CPU,
 			"ram":metric.RAM,
 			"disk":metric.Disk,
-			"lastseen":s.lastSeen[id],
+			"lastSeen":s.lastSeen[id],
 			"status":status,
 		})
 	}
 	return out
+}
+
+func (s *MemoryStore) GetByID(id string) (map[string]any, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	metric, ok := s.metrics[id]
+	if !ok {
+		return nil, false
+	}
+
+	status := "online"
+	if time.Now().Unix()-s.lastSeen[id] > 30 {
+		status = "offline"
+	}
+
+	return map[string]any{
+		"serverId": id,
+		"hostName": metric.Hostname,
+		"cpu":      metric.CPU,
+		"ram":      metric.RAM,
+		"disk":     metric.Disk,
+		"lastSeen": s.lastSeen[id],
+		"status":   status,
+	}, true
 }
 
 func (s *MemoryStore) GetContainers(id string) []models.ContainerInfo{

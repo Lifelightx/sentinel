@@ -1,0 +1,29 @@
+{{define "dashboard"}}
+<div class="page-head">
+  <div>
+    <h1>Servers</h1>
+    <p class="muted">Live infrastructure overview</p>
+  </div>
+</div>
+
+<div class="panel">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Server</th>
+        <th>Status</th>
+        <th>CPU</th>
+        <th>RAM</th>
+        <th>Disk</th>
+        <th>Last Seen</th>
+      </tr>
+    </thead>
+
+    <tbody
+      hx-get="/partials/servers"
+      hx-trigger="load, every 5s"
+      hx-swap="innerHTML">
+    </tbody>
+  </table>
+</div>
+{{end}}

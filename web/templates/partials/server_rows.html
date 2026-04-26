@@ -1,0 +1,18 @@
+{{range .}}
+<tr class="row-link" onclick="window.location='/server/{{.serverId}}'">
+  <td>{{.serverId}}</td>
+
+  <td>
+    {{if eq .status "online"}}
+      <span class="badge green">online</span>
+    {{else}}
+      <span class="badge red">offline</span>
+    {{end}}
+  </td>
+
+  <td>{{printf "%.1f" .cpu}}%</td>
+  <td>{{printf "%.1f" .ram}}%</td>
+  <td>{{printf "%.1f" .disk}}%</td>
+  <td>{{.lastSeen}}</td>
+</tr>
+{{end}}
