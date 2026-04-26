@@ -1,0 +1,27 @@
+{{define "server_summary.html"}}
+<div class="stats-bar">
+
+  <div class="stat-box">
+    <span class="label">Status</span>
+    <span class="value {{if eq (index . "status") "online"}}green-text{{else}}red-text{{end}}">
+      {{index . "status"}}
+    </span>
+  </div>
+
+  <div class="stat-box">
+    <span class="label">CPU</span>
+    <span class="value">{{printf "%.1f" (index . "cpu")}}%</span>
+  </div>
+
+  <div class="stat-box">
+    <span class="label">RAM</span>
+    <span class="value">{{printf "%.1f" (index . "ram")}}%</span>
+  </div>
+
+  <div class="stat-box">
+    <span class="label">Disk</span>
+    <span class="value">{{printf "%.1f" (index . "disk")}}%</span>
+  </div>
+
+</div>
+{{end}}

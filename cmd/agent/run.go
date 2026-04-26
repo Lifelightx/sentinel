@@ -1,4 +1,4 @@
-package main
+package agent
 
 import (
 	"log"
@@ -12,7 +12,7 @@ import (
 )
 
 
-func main(){
+func Run(){
 	natsUrl := getEnv("NATS_URL", "nats://localhost:4222")
 	serverId := getEnv("SERVER_ID", "server-1")
 
@@ -81,3 +81,4 @@ func getEnv(key, fallback string) string{
 	}
 	return val
 }
+

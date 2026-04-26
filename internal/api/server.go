@@ -17,6 +17,7 @@ func Start(addr string, mem *store.MemoryStore) error {
 		"web/templates/server.html",
 		"web/templates/partials/server_rows.html",
 		"web/templates/partials/containers_rows.html",
+		"web/templates/partials/server_summary.html",
 	))
 
 	/* JSON APIs */
@@ -74,6 +75,18 @@ func Start(addr string, mem *store.MemoryStore) error {
 		id := r.URL.Query().Get("serverId")
 		tmpl.ExecuteTemplate(w, "container_rows.html", mem.GetContainers(id))
 	})
+
+	http.HandleFunc("/partials/server-summary", func(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("serverId")
+
+	server, ok := mem.GetByID(id)
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	tmpl.ExecuteTemplate(w, "server_summary.html", server)
+})
 
 	/* Static CSS */
 

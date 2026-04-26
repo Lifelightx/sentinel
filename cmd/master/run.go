@@ -1,4 +1,4 @@
-package main
+package master
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 )
 
 
-func main(){
+func Run(){
 	natsURL := getEnv("NATS_URL", "nats://localhost:4222")
 	mem := store.New()
 	client := broker.New(natsURL)
