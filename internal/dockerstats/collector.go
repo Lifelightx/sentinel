@@ -62,7 +62,7 @@ func Collect() ([]models.ContainerInfo, error){
 		// log.Println(stats)
 		inspect, err := cli.ContainerInspect(context.Background(), c.ID)
 		health := "none"
-		if err != nil && inspect.State != nil && inspect.State.Health != nil{
+		if err == nil && inspect.State != nil && inspect.State.Health != nil{
 			health = inspect.State.Health.Status
 		}
 		memMB := float64(stats.MemoryStats.Usage) / 1024 / 1024

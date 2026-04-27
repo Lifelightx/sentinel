@@ -8,3 +8,14 @@ type ServerState struct {
 	Status     string
 	LastMetric Metrics
 }
+type ServerView struct {
+    ServerID    string
+    Hostname    string
+    CPU         float64
+    RAM         float64
+    Disk        float64
+    Status      string
+    LastSeen    int64
+    AlertScore  int
+    AlertCount  int
+}
