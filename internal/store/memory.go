@@ -2,6 +2,7 @@ package store
 
 import (
 	"sentinel/internal/models"
+	"sort"
 	"sync"
 	"time"
 )
@@ -40,53 +41,64 @@ func (s *MemoryStore) SetContainers(id string, data[]models.ContainerInfo){
 	s.containers[id] = data
 }
 
-func (s *MemoryStore) GetAll() []map[string]any{
+func (s *MemoryStore) GetAll() []models.ServerView{
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	out := []map[string]any{}
+	out := []models.ServerView{}
 	now := time.Now().Unix()
 
 	for id, metric := range s.metrics{
 		status :="online"
-
+		score, count := s.calCulateAlertScore(metric, id)
 		if now - s.lastSeen[id] > 30{
 			status = "offline"
 		}
-		out = append(out, map[string]any{
-			"serverId":id,
-			"hostName":metric.Hostname,
-			"cpu":metric.CPU,
-			"ram":metric.RAM,
-			"disk":metric.Disk,
-			"lastSeen":s.lastSeen[id],
-			"status":status,
+		out = append(out, models.ServerView{
+			ServerID:id,
+			Hostname:metric.Hostname,
+			CPU:metric.CPU,
+			RAM:metric.RAM,
+			Disk:metric.Disk,
+			LastSeen:s.lastSeen[id],
+			Status:status,
+			AlertCount: count,
+			AlertScore: score,
 		})
 	}
+
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].AlertScore == out[j].AlertScore {
+			return out[i].AlertCount > out[j].AlertCount
+		}
+		return out[i].AlertScore > out[j].AlertScore
+	})
+
 	return out
 }
 
-func (s *MemoryStore) GetByID(id string) (map[string]any, bool) {
+func (s *MemoryStore) GetByID(id string) (models.ServerView, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
+	
 	metric, ok := s.metrics[id]
 	if !ok {
-		return nil, false
+		return models.ServerView{}, false
 	}
 
 	status := "online"
 	if time.Now().Unix()-s.lastSeen[id] > 30 {
 		status = "offline"
 	}
-
-	return map[string]any{
-		"serverId": id,
-		"hostName": metric.Hostname,
-		"cpu":      metric.CPU,
-		"ram":      metric.RAM,
-		"disk":     metric.Disk,
-		"lastSeen": s.lastSeen[id],
-		"status":   status,
+	
+	
+	return models.ServerView{
+		ServerID: id,
+		Hostname: metric.Hostname,
+		CPU:      metric.CPU,
+		RAM:      metric.RAM,
+		Disk:     metric.Disk,
+		LastSeen: s.lastSeen[id],
+		Status:   status,
 	}, true
 }
 
@@ -94,4 +106,33 @@ func (s *MemoryStore) GetContainers(id string) []models.ContainerInfo{
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return  s.containers[id]
+}
+
+func (s *MemoryStore) calCulateAlertScore(metric models.Metrics, id string)(int, int){
+	score :=0
+	count :=0
+	if metric.CPU > 95{
+		score += 15
+		count++
+	}
+	if metric.RAM > 90{
+		score += 20
+		count++
+	}
+	if metric.Disk > 90{
+		score += 30
+		count++
+	}
+	for _, c := range s.containers[id]{
+		if c.Health == "unhealthy"{
+			score += 40
+			count++
+		}
+		if c.State == "exited"{
+			score += 10
+			count ++
+		}
+
+	}
+	return score, count
 }

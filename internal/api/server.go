@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"strings"
-
+	"fmt"
 	"sentinel/internal/store"
 )
 
@@ -15,9 +15,6 @@ func Start(addr string, mem *store.MemoryStore) error {
 		"web/templates/layout.html",
 		"web/templates/dashboard.html",
 		"web/templates/server.html",
-		"web/templates/partials/server_rows.html",
-		"web/templates/partials/containers_rows.html",
-		"web/templates/partials/server_summary.html",
 	))
 
 	/* JSON APIs */
@@ -28,10 +25,21 @@ func Start(addr string, mem *store.MemoryStore) error {
 	})
 
 	http.HandleFunc("/api/containers", func(w http.ResponseWriter, r *http.Request) {
-		id := r.URL.Query().Get("serverId")
-
+		id := r.URL.Query().Get("ServerID")
+		fmt.Println("ServerID:", id)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(mem.GetContainers(id))
+	})
+
+	http.HandleFunc("/api/servers/alerts", func(w http.ResponseWriter, r *http.Request) {
+		id := r.URL.Query().Get("ServerID")
+		w.Header().Set("Content-Type", "application/json")
+		server, ok := mem.GetByID(id)
+		if !ok {
+			http.NotFound(w, r)
+			return
+		}
+		json.NewEncoder(w).Encode(server)
 	})
 
 	/* Dashboard */
@@ -65,28 +73,7 @@ func Start(addr string, mem *store.MemoryStore) error {
 		})
 	})
 
-	/* HTMX partials */
 
-	http.HandleFunc("/partials/servers", func(w http.ResponseWriter, r *http.Request) {
-		tmpl.ExecuteTemplate(w, "server_rows.html", mem.GetAll())
-	})
-
-	http.HandleFunc("/partials/containers", func(w http.ResponseWriter, r *http.Request) {
-		id := r.URL.Query().Get("serverId")
-		tmpl.ExecuteTemplate(w, "container_rows.html", mem.GetContainers(id))
-	})
-
-	http.HandleFunc("/partials/server-summary", func(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("serverId")
-
-	server, ok := mem.GetByID(id)
-	if !ok {
-		http.NotFound(w, r)
-		return
-	}
-
-	tmpl.ExecuteTemplate(w, "server_summary.html", server)
-})
 
 	/* Static CSS */
 

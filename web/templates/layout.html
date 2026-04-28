@@ -4,7 +4,16 @@
 <head>
   <meta charset="UTF-8">
   <title>Sentinel</title>
-  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "preact": "https://esm.sh/preact@10.20.1",
+      "preact/hooks": "https://esm.sh/preact@10.20.1/hooks",
+      "htm/preact": "https://esm.sh/htm@3.1.1/preact?external=preact"
+    }
+  }
+  </script>
+  <script type="module" src="/static/app.js"></script>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>

@@ -2,43 +2,13 @@
 
 <div class="page-head">
   <div>
-    <h1>{{index . "serverId"}}</h1>
+    <h1>{{.ServerID}}</h1>
     <p class="muted">Container health and resource usage</p>
   </div>
 
   <a href="/" class="btn">← Back</a>
 </div>
 
-<div
-  id="server-summary"
-  hx-get="/partials/server-summary?serverId={{index . "serverId"}}"
-  hx-trigger="load, every 5s"
-  hx-target="#server-summary"
-  hx-swap="innerHTML">
-</div>
-
-<div class="panel">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>ID</th>
-        <th>State</th>
-        <th>Health</th>
-        <th>CPU</th>
-        <th>Memory</th>
-        <th>Mem %</th>
-      </tr>
-    </thead>
-
-    <tbody
-      id="container-body"
-      hx-get="/partials/containers?serverId={{index . "serverId"}}"
-      hx-trigger="load, every 10s"
-      hx-target="#container-body"
-      hx-swap="innerHTML">
-    </tbody>
-  </table>
-</div>
+<div id="preact-server-app" data-server-id="{{.ServerID}}"></div>
 
 {{end}}

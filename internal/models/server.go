@@ -8,6 +8,7 @@ type ServerState struct {
 	Status     string
 	LastMetric Metrics
 }
+
 type ServerView struct {
     ServerID    string
     Hostname    string
