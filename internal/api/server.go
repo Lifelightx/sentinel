@@ -73,6 +73,9 @@ func Start(addr string, mem *store.MemoryStore) error {
 		})
 	})
 
+	// docker commands
+	
+
 
 
 	/* Static CSS */

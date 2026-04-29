@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	
+
 	"log"
 	"sentinel/internal/dockerstats"
+	"sentinel/internal/metrics"
 )
 
 func main(){
@@ -21,4 +22,10 @@ func main(){
 		)
 	}
 
+	metric, err := metrics.Collect()
+	if err != nil{
+		log.Println(err)
+	}
+	log.Println(metric)
+	
 }

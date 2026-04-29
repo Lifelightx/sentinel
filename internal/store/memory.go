@@ -59,6 +59,7 @@ func (s *MemoryStore) GetAll() []models.ServerView{
 			CPU:metric.CPU,
 			RAM:metric.RAM,
 			Disk:metric.Disk,
+			IPv4: metric.IPv4,
 			LastSeen:s.lastSeen[id],
 			Status:status,
 			AlertCount: count,
@@ -97,6 +98,7 @@ func (s *MemoryStore) GetByID(id string) (models.ServerView, bool) {
 		CPU:      metric.CPU,
 		RAM:      metric.RAM,
 		Disk:     metric.Disk,
+		IPv4: 	  metric.IPv4,
 		LastSeen: s.lastSeen[id],
 		Status:   status,
 	}, true

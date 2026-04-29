@@ -436,6 +436,7 @@ a {
 /* Sticky Header */
 .table-container {
   max-height: 600px;
+  overflow-x: auto;
   overflow-y: auto;
 }
 .table thead th {

@@ -15,6 +15,7 @@ type ServerView struct {
     CPU         float64
     RAM         float64
     Disk        float64
+    IPv4          string
     Status      string
     LastSeen    int64
     AlertScore  int

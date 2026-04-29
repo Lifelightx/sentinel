@@ -1,17 +1,18 @@
 package metrics
 
 import (
+	"net"
 	"sentinel/internal/models"
 	"time"
 
 	"github.com/shirou/gopsutil/v4/cpu"
-	"github.com/shirou/gopsutil/v4/host"
 	"github.com/shirou/gopsutil/v4/disk"
+	"github.com/shirou/gopsutil/v4/host"
 	"github.com/shirou/gopsutil/v4/mem"
 )
 
 
-func Collect(serverId string)(models.Metrics, error){
+func Collect()(models.Metrics, error){
 	hostInfo, _ := host.Info()
 	cpuUsage, _ := cpu.Percent(1*time.Second, false)
 	memInfo, _ := mem.VirtualMemory()
@@ -19,9 +20,10 @@ func Collect(serverId string)(models.Metrics, error){
 
 	// data to be sent
 	data := models.Metrics{
-		ServerId: serverId,
+		
 		Hostname: hostInfo.Hostname,
 		CPU: cpuUsage[0],
+		IPv4: getIP(),
 		RAM: memInfo.UsedPercent,
 		Disk: diskInfo.UsedPercent,
 		Uptime: hostInfo.Uptime,
@@ -29,4 +31,25 @@ func Collect(serverId string)(models.Metrics, error){
 
 	}
 	return  data, nil
+}
+
+func getIP() string{
+	addrs, err := net.InterfaceAddrs()
+	if err != nil{
+		return ""
+	}
+	for _, addr := range addrs{
+		ipNet, ok := addr.(*net.IPNet)
+		if !ok{
+			continue
+		}
+		if ipNet.IP.IsLoopback(){
+			continue
+		}
+		ip := ipNet.IP.To4()
+		if ip != nil{
+			return ip.String()
+		}
+	}
+	return ""
 }

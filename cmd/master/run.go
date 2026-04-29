@@ -21,16 +21,16 @@ func Run(){
 		var m models.Metrics
 
 		if err := json.Unmarshal(data, &m); err == nil{
-			mem.SetMetrics(m.ServerId, m)
-			log.Println("received:", m.ServerId, m.CPU, "%")
+			mem.SetMetrics(m.Hostname, m)
+			log.Println("received:", m.Hostname, m.CPU, "%")
 		}
 	})
 	//sebscriber for heartbeat
 	client.Subscribe("heartbeat.*", func(data []byte) {
 		var h models.Heartbeat
 		if err := json.Unmarshal(data, &h); err == nil{
-			mem.SetHeartbeat(h.ServerId, h.TimeStamp)
-			log.Println("heartbeat recieved:", h.ServerId)
+			mem.SetHeartbeat(h.Hostname, h.TimeStamp)
+			log.Println("heartbeat recieved:", h.Hostname)
 		}
 	})
 	//subscriber for containers

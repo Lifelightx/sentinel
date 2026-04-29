@@ -61,6 +61,7 @@ function Dashboard() {
         .catch(console.error);
     };
     fetchServers();
+    console.log(servers)
     const interval = setInterval(fetchServers, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -77,6 +78,7 @@ function Dashboard() {
               <th>RAM</th>
               <th>Disk</th>
               <th>Alerts</th>
+              <th>IP</th>
               <th>Last Seen</th>
             </tr>
           </thead>
@@ -97,6 +99,7 @@ function Dashboard() {
                     ? html`<span class="badge red">${server.AlertCount}</span>`
                     : html`<span class="badge gray">0</span>`}
                 </td>
+                <td>${server.IPv4}</td>
                 <td>${new Date(server.LastSeen * 1000).toLocaleString()}</td>
               </tr>
             `)}

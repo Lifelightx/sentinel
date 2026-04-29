@@ -14,7 +14,7 @@ import (
 
 func Run(){
 	natsUrl := getEnv("NATS_URL", "nats://localhost:4222")
-	serverId := getEnv("SERVER_ID", "server-1")
+	serverId := getHostName()
 
 	client := broker.New(natsUrl)
 	log.Println("Agent Started:", serverId)
@@ -27,7 +27,7 @@ func Run(){
 
 func startMetricsLoop(client *broker.Client, serverId string){
 	for{
-		data, err := metrics.Collect(serverId)
+		data, err := metrics.Collect()
 		if err == nil{
 			publish(client, "metrics."+serverId, data,  "metrics sent")
 		}
@@ -38,7 +38,7 @@ func startMetricsLoop(client *broker.Client, serverId string){
 func startHeartbeatLoop(client *broker.Client, serverId string){
 	for{
 		data := models.Heartbeat{
-			ServerId: serverId,
+			Hostname: serverId,
 			TimeStamp: time.Now().Unix(),
 		}
 		publish(client, "heartbeat."+serverId, data,"heartbeat sent")
@@ -82,3 +82,11 @@ func getEnv(key, fallback string) string{
 	return val
 }
 
+
+func getHostName() string{
+	hostname, err := os.Hostname()
+	if err == nil && hostname != "" {
+		return hostname
+	}
+	return "Unknown-server"
+}
