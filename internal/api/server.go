@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"strings"
-	"fmt"
+	
 	"sentinel/internal/store"
 )
 
@@ -26,7 +26,7 @@ func Start(addr string, mem *store.MemoryStore) error {
 
 	http.HandleFunc("/api/containers", func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Query().Get("ServerID")
-		fmt.Println("ServerID:", id)
+		
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(mem.GetContainers(id))
 	})
