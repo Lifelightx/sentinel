@@ -1,13 +1,13 @@
 # Sentinel 
 
-Sentinel is a lightweight, distributed system and Docker monitoring tool. It follows a master-agent architecture, using **NATS** as a high-performance messaging backbone and **HTMX** for a responsive, real-time web dashboard.
+Sentinel is a lightweight, distributed system and Docker monitoring tool. It follows a master-agent architecture, using **NATS** as a high-performance messaging backbone and a **Preact**-based frontend for a responsive, real-time web dashboard.
 
 ## Features
 
 - **Distributed Monitoring**: Deploy agents on multiple servers to collect metrics centrally.
-- **System Metrics**: Real-time tracking of CPU, Memory, and Disk usage.
-- **Docker Integration**: Monitor container status and resource utilization across your fleet.
-- **Live Dashboard**: A sleek web interface built with Go templates and HTMX for real-time updates without heavy JavaScript frameworks.
+- **System Metrics**: Real-time tracking of CPU, Memory, Disk usage, and IPv4 addresses.
+- **Docker Integration**: Monitor container status, resource utilization, and perform actions like fetching logs or inspecting containers directly from the UI.
+- **Live Dashboard**: A sleek, real-time web interface built with Go templates and Preact, featuring advanced sorting, search, and interactive container management modals.
 - **High Performance**: Built with Go and NATS for low latency and minimal resource footprint.
 
 ## Architecture
@@ -20,7 +20,7 @@ Sentinel is a lightweight, distributed system and Docker monitoring tool. It fol
 
 - **Backend**: [Go](https://go.dev/)
 - **Messaging**: [NATS](https://nats.io/)
-- **Frontend**: [HTMX](https://htmx.org/), Go Templates, Vanilla CSS
+- **Frontend**: [Preact](https://preactjs.com/), Go Templates, Vanilla CSS
 - **Metrics**: `gopsutil`, Docker SDK
 
 ## 🏁 Getting Started
@@ -59,8 +59,8 @@ You can run only the agent using Docker:
 ```bash
 docker run -d \
   --name sentinel-agent \
+  --hostname remote-server-01 \
   -e NATS_URL="nats://192.168.1.50:4222" \
-  -e SERVER_ID="remote-server-01" \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --restart unless-stopped \
   <your-docker-registry>/sentinel-agent:latest
@@ -74,7 +74,6 @@ Both components can be configured via environment variables:
 | Variable | Description | Default |
 | :--- | :--- | :--- |
 | `NATS_URL` | URL of the NATS server | `nats://localhost:4222` |
-| `SERVER_ID` | (Agent only) Unique identifier for the server | `server-1` |
 | `ADDR` | (Master only) Address to bind the HTTP server | `:8080` |
 
 ## API Endpoints
@@ -82,7 +81,9 @@ Both components can be configured via environment variables:
 Sentinel Master provides a simple JSON API for integration with other tools:
 
 - `GET /api/servers`: Lists all active servers and their latest system metrics.
-- `GET /api/containers?serverId=<id>`: Lists Docker containers and stats for a specific server.
+- `GET /api/containers?ServerID=<id>`: Lists Docker containers and stats for a specific server.
+- `POST /api/actions`: Submit an action (e.g., logs, inspect) to be executed by an agent on a specific container.
+- `GET /api/result?hostname=<id>&containerId=<id>&action=<action>`: Poll for the result of a submitted action.
 
 ---
-Built with ❤️ using Go and HTMX.
+Built with ❤️ using Go and Preact.

@@ -25,7 +25,7 @@ Because apparently one image doing two jobs is now the sensible timeline.
 ## Pull
 
 ```bash
-docker pull sentinel:latest
+docker pull jeebanjyotimallik/sentinel:latest
 ```
 
 ## Or Build Locally
@@ -75,7 +75,7 @@ docker run -d \
   --name sentinel-master \
   -p 8080:8080 \
   -e NATS_URL=nats://host.docker.internal:4222 \
-  sentinel master
+  jeebanjyotimallik/sentinel master
 ```
 
 ## Open Dashboard
@@ -93,10 +93,10 @@ Run this on any server you want to monitor.
 ```bash
 docker run -d \
   --name sentinel-agent \
-  -e SERVER_ID=server-1 \
+  --user 0:0 \
   -e NATS_URL=nats://MASTER_SERVER_IP:4222 \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  sentinel agent
+  jeebanjyotimallik/sentinel agent
 ```
 
 ---
@@ -114,10 +114,10 @@ docker run -d \
 ```bash
 docker run -d \
   --name sentinel-agent \
-  -e SERVER_ID=prod-node-1 \
+  --user 0:0 \
   -e NATS_URL=nats://10.72.20.38:4222 \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  sentinel agent
+  jeebanjyotimallik/sentinel agent
 ```
 
 ---
@@ -127,13 +127,13 @@ docker run -d \
 ## Run Master
 
 ```bash
-docker run sentinel master
+docker run jeebanjyotimallik/sentinel master
 ```
 
 ## Run Agent
 
 ```bash
-docker run sentinel agent
+docker run --user 0:0 jeebanjyotimallik/sentinel agent
 ```
 
 ---
@@ -148,9 +148,7 @@ docker run sentinel agent
 
 ## Agent Only
 
-| Variable    | Description           | Example       |
-| ----------- | --------------------- | ------------- |
-| `SERVER_ID` | Unique server name/id | `prod-node-1` |
+(No agent-specific environment variables are required. Hostname is resolved automatically.)
 
 ---
 
@@ -231,7 +229,7 @@ Check:
 
 * Run Master + NATS on dedicated server
 * Use private IP / VPN
-* Use unique `SERVER_ID` for each agent
+* Ensure each host has a unique machine hostname
 * Enable restart policy:
 
 ```bash
@@ -246,10 +244,10 @@ Check:
 docker run -d \
   --restart unless-stopped \
   --name sentinel-agent \
-  -e SERVER_ID=prod-api-01 \
+  --user 0:0 \
   -e NATS_URL=nats://10.72.20.38:4222 \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  sentinel agent
+  jeebanjyotimallik/sentinel agent
 ```
 
 ---
@@ -260,13 +258,13 @@ docker run -d \
 
 ```bash
 docker run -d --name nats -p 4222:4222 nats
-docker run -d --name sentinel-master -p 8080:8080 -e NATS_URL=nats://host.docker.internal:4222 sentinel master
+docker run -d --name sentinel-master -p 8080:8080 -e NATS_URL=nats://host.docker.internal:4222 jeebanjyotimallik/sentinel master
 ```
 
 ## Start Agent Side
 
 ```bash
-docker run -d --name sentinel-agent -e SERVER_ID=node-1 -e NATS_URL=nats://MASTER_IP:4222 -v /var/run/docker.sock:/var/run/docker.sock sentinel agent
+docker run -d --name sentinel-agent --user 0:0 -e NATS_URL=nats://MASTER_IP:4222 -v /var/run/docker.sock:/var/run/docker.sock jeebanjyotimallik/sentinel agent
 ```
 
 ---

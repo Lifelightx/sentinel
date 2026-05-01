@@ -7,9 +7,8 @@ services:
       - "8222:8222" # Monitor port
 
   master:
-    build:
-      context: .
-      target: master
+    image: jeebanjyotimallik/sentinel
+    command: master
     container_name: sentinel-master
     depends_on:
       - nats
@@ -20,16 +19,15 @@ services:
     restart: unless-stopped
 
   agent:
-    build:
-      context: .
-      target: agent
+    image: jeebanjyotimallik/sentinel
+    command: agent
+    user: "0:0"
     container_name: sentinel-agent
     depends_on:
       - nats
     env_file:
       - .env
-    environment:
-      - SERVER_ID=main-agent
+    hostname: agent
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # Required to monitor Docker stats
     restart: unless-stopped
