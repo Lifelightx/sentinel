@@ -274,86 +274,95 @@ function ContainerList({ serverId, onSelectContainer }) {
 function ContainerDetails({ container, onBack }) {
   const [toastMsg, setToastMsg] = useState('');
   const [modalState, setModalState] = useState(null);
+  const [modalContent, setModalContent] = useState("Loading...");
+  const serverId = window.location.pathname.split("/")[2];
 
-  const handleAction = (action) => {
-    if (['Restart', 'Stop', 'Start'].includes(action)) {
-      setToastMsg(`${action} action coming soon`);
-    } else if (action === 'Logs') {
-      setModalState({ type: 'logs', container });
-    } else if (action === 'Inspect') {
-      setModalState({ type: 'inspect', container });
-    }
+  const runAction = async (action) => {
+    setModalState(action);
+    setModalContent("Loading...");
+
+    // trigger backend
+    await fetch("/api/actions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        action: action.toLowerCase(),
+        container_id: container.id,
+        hostName: serverId
+      })
+    });
+
+    pollResult(action.toLowerCase());
+  };
+
+  const pollResult = (action) => {
+    let attempts = 0;
+
+    const interval = setInterval(async () => {
+      attempts++;
+
+      const res = await fetch(
+        `/api/result?hostname=${serverId}&containerId=${container.id}&action=${action}`
+      );
+
+      if (res.status === 200) {
+        const data = await res.json();
+        clearInterval(interval);
+
+        let content = data.Response.data;
+
+        // pretty print JSON
+        if (action === "inspect") {
+          try {
+            content = JSON.stringify(JSON.parse(content), null, 2);
+          } catch {}
+        }
+
+        setModalContent(content);
+      }
+
+      if (attempts > 10) {
+        clearInterval(interval);
+        setModalContent("Timeout: no response from agent");
+      }
+
+    }, 1000);
   };
 
   return html`
     <div class="container-details">
       <div class="page-head" style="margin-bottom: 24px;">
         <div>
-          <button class="btn" onClick=${onBack} style="margin-bottom: 12px;">&larr; Back to Server</button>
-          <h1 style="margin-bottom: 4px;">${container.name}</h1>
-          <div class="muted" style="margin-top: 0;">ID: ${container.id}</div>
-        </div>
-        <div class="actions-cell">
-          <button class="action-btn" onClick=${() => handleAction('Start')}>Start</button>
-          <button class="action-btn" onClick=${() => handleAction('Restart')}>Restart</button>
-          <button class="action-btn" onClick=${() => handleAction('Stop')}>Stop</button>
-        </div>
-      </div>
-      
-      <div class="stats-bar">
-        <div class="stat-box">
-          <span class="label">State</span>
-          <span class="value ${container.state === 'running' ? 'green-text' : 'red-text'}">${container.state}</span>
-        </div>
-        <div class="stat-box">
-          <span class="label">Health</span>
-          <span class="value">${container.health}</span>
-        </div>
-        <div class="stat-box">
-          <span class="label">CPU Usage</span>
-          <span class="value ${getThresholdColor(container.cpuPercentage)}-text">${container.cpuPercentage.toFixed(1)}%</span>
-        </div>
-        <div class="stat-box">
-          <span class="label">Memory</span>
-          <span class="value ${getThresholdColor(container.memoryPercentage)}-text">${container.memoryMB.toFixed(1)} MB</span>
+          <button class="btn" onClick=${onBack} style="margin-bottom: 12px;">← Back</button>
+          <h1>${container.name}</h1>
+          <div class="muted">ID: ${container.id}</div>
         </div>
       </div>
 
-      <div class="panel" style="margin-top: 24px;">
+      <div class="panel">
         <div class="modal-header">
-          <h3 style="margin: 0;">Details & Configuration</h3>
+          <h3>Actions</h3>
           <div>
-            <button class="action-btn" onClick=${() => handleAction('Logs')} style="margin-right: 8px;">View Logs</button>
-            <button class="action-btn" onClick=${() => handleAction('Inspect')}>Inspect JSON</button>
+            <button class="action-btn" onClick=${() => runAction("logs")}>
+              Logs
+            </button>
+            <button class="action-btn" onClick=${() => runAction("inspect")}>
+              Inspect
+            </button>
           </div>
-        </div>
-        <div class="modal-body">
-          <p><strong>Image:</strong> dummy-image:latest</p>
-          <p><strong>Created:</strong> ${new Date().toLocaleString()}</p>
-          <p><strong>Ports:</strong> 8080:80, 443:443 (Dummy)</p>
-          <p><strong>Mounts:</strong> /var/lib/dummy:/data (Dummy)</p>
         </div>
       </div>
 
-      <${Toast} message=${toastMsg} onClose=${() => setToastMsg('')} />
-      
-      <${Modal} 
-        isOpen=${!!modalState} 
-        onClose=${() => setModalState(null)} 
-        title=${modalState?.type === 'logs' ? 'Container Logs' : 'Container Inspect'}
+      <${Modal}
+        isOpen=${!!modalState}
+        onClose=${() => setModalState(null)}
+        title=${modalState === "logs" ? "Container Logs" : "Inspect"}
       >
-        ${modalState?.type === 'logs' ? html`
-          <div class="mock-logs">
-            [INFO] Starting service...<br/>
-            [INFO] Listening on port 8080<br/>
-            [DEBUG] Connection established<br/>
-            [WARN] Memory usage high
-          </div>
-        ` : modalState?.type === 'inspect' ? html`
-          <div class="mock-json">
-            ${JSON.stringify(modalState.container, null, 2)}
-          </div>
-        ` : null}
+        <div class=${modalState === "logs" ? "mock-logs" : "mock-json"}>
+          ${modalContent}
+        </div>
       </${Modal}>
     </div>
   `;

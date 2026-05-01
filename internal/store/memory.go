@@ -1,6 +1,7 @@
 package store
 
 import (
+	
 	"sentinel/internal/models"
 	"sort"
 	"sync"
@@ -12,6 +13,7 @@ type MemoryStore struct{
 	metrics map[string]models.Metrics
 	lastSeen map[string]int64
 	containers map[string][]models.ContainerInfo
+	commandResults map[string]models.CommandResult
 }
 
 func New() *MemoryStore{
@@ -19,6 +21,7 @@ func New() *MemoryStore{
 		metrics: make(map[string]models.Metrics),
 		lastSeen: make(map[string]int64),
 		containers: make(map[string][]models.ContainerInfo),
+		commandResults: make(map[string]models.CommandResult),
 	}
 }
 
@@ -137,4 +140,24 @@ func (s *MemoryStore) calCulateAlertScore(metric models.Metrics, id string)(int,
 
 	}
 	return score, count
+}
+
+func (s *MemoryStore) SetCommandResult(hostname ,containerID , action string, resp models.CommandResponse){
+	key := hostname + ":" +  containerID + ":" + action
+	s.commandResults[key] = models.CommandResult{
+		HostName: hostname,
+		ContainerID: containerID,
+		Action: action,
+		Response: resp,
+		Timestamp: time.Now().Unix(),
+	}
+	
+}
+
+func(s *MemoryStore) GetCommandResult(hostname ,containerID, action string)(models.CommandResult, bool){
+	key := hostname + ":" +  containerID + ":" + action
+
+	res, ok := s.commandResults[key]
+	
+	return  res,ok
 }

@@ -37,13 +37,23 @@ func Run(){
 	client.Subscribe("containers.*", func(data []byte) {
 	var payload models.ContainerPayload
 	if err := json.Unmarshal(data, &payload); err == nil{
-		mem.SetContainers(payload.ServerId, payload.Containers)
+		mem.SetContainers(payload.HostName, payload.Containers)
 	}
-	log.Println("container stats received:", payload.ServerId)
+	log.Println("container stats received:", payload.HostName)
 })
+
+	client.Subscribe("reply.*", func(data []byte) {
+		var resp models.CommandResponseWrapper
+		
+		if err := json.Unmarshal(data, &resp); err == nil{
+			mem.SetCommandResult(resp.HostName, resp.ContainerID,resp.Action, resp.Response)
+			log.Println("command response stored for: ", resp.HostName, resp.ContainerID, resp.Action)
+		}
+
+	})
 	
 	log.Println("master started at :8080")
-	log.Fatal(api.Start(":8080",mem))
+	log.Fatal(api.Start(":8080",mem, client))
 }
 
 func getEnv(key , fallback string) string{

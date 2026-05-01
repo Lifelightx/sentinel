@@ -13,7 +13,7 @@ type ContainerInfo struct{
 }
 
 type ContainerPayload struct{
-	ServerId string `json:"serverId"`
+	HostName string `json:"hostName"`
 	TimeStamp int64 `json:"timestamp"`
 	Containers []ContainerInfo `json:"containers"`
 }
