@@ -1,7 +1,8 @@
 package metrics
 
 import (
-	"net"
+	
+	"os"
 	"sentinel/internal/models"
 	"time"
 
@@ -11,8 +12,7 @@ import (
 	"github.com/shirou/gopsutil/v4/mem"
 )
 
-
-func Collect()(models.Metrics, error){
+func Collect() (models.Metrics, error) {
 	hostInfo, _ := host.Info()
 	cpuUsage, _ := cpu.Percent(1*time.Second, false)
 	memInfo, _ := mem.VirtualMemory()
@@ -20,36 +20,22 @@ func Collect()(models.Metrics, error){
 
 	// data to be sent
 	data := models.Metrics{
-		
-		Hostname: hostInfo.Hostname,
-		CPU: cpuUsage[0],
-		IPv4: getIP(),
-		RAM: memInfo.UsedPercent,
-		Disk: diskInfo.UsedPercent,
-		Uptime: hostInfo.Uptime,
-		TimeStamp: time.Now().Unix(),
 
+		Hostname:  os.Getenv("HOST_NAME"),
+		CPU:       cpuUsage[0],
+		IPv4:      getIP(),
+		RAM:       memInfo.UsedPercent,
+		Disk:      diskInfo.UsedPercent,
+		Uptime:    hostInfo.Uptime,
+		TimeStamp: time.Now().Unix(),
 	}
-	return  data, nil
+	return data, nil
 }
 
-func getIP() string{
-	addrs, err := net.InterfaceAddrs()
-	if err != nil{
-		return ""
+func getIP() string {
+	ip := os.Getenv("HOST_IP")
+	if ip != "" {
+		return ip
 	}
-	for _, addr := range addrs{
-		ipNet, ok := addr.(*net.IPNet)
-		if !ok{
-			continue
-		}
-		if ipNet.IP.IsLoopback(){
-			continue
-		}
-		ip := ipNet.IP.To4()
-		if ip != nil{
-			return ip.String()
-		}
-	}
-	return ""
+	return "unknown"
 }

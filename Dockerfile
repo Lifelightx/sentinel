@@ -10,7 +10,10 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o sentinel ./cmd/sentinel
 # Runtime stage
-FROM scratch
+FROM alpine:3.20
+
+# install docker CLI
+RUN apk add --no-cache docker-cli
 
 WORKDIR /
 

@@ -11,6 +11,8 @@ import (
 	"sentinel/internal/dockerstats"
 	"sentinel/internal/metrics"
 	"sentinel/internal/models"
+
+	"github.com/shirou/gopsutil/v4/host"
 )
 
 
@@ -80,7 +82,7 @@ func startMetricsLoop(client *broker.Client, serverId string){
 		data, err := metrics.Collect()
 		if err == nil{
 			publish(client, "metrics."+serverId, data,  "metrics sent: ")
-			// log.Println(serverId)
+			// log.Println(data.Hostname)
 		}
 		time.Sleep(5 * time.Second)
 	}
@@ -134,10 +136,17 @@ func getEnv(key, fallback string) string{
 }
 
 
-func getHostName() string{
-	hostname, err := os.Hostname()
-	if err == nil && hostname != "" {
-		return hostname
+func getHostName() string {
+	// 1. Try env first (correct source)
+	if val := os.Getenv("HOST_NAME"); val != "" {
+		return val
 	}
-	return "Unknown-server"
+
+	// 2. fallback (only for local runs)
+	hostInfo, err := host.Info()
+	if err == nil && hostInfo.Hostname != "" {
+		return hostInfo.Hostname
+	}
+
+	return "unknown-host"
 }
