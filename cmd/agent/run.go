@@ -35,6 +35,10 @@ func Run(){
 			result, execErr = dockerstats.GetContainerLogs(cmd.ContainerID)
 		case models.ActionInspect:
 			result, execErr = dockerstats.InspectContainer(cmd.ContainerID)
+		case models.Restart:
+			result, execErr = dockerstats.RestartContainer(cmd.ContainerID)
+		case models.Stop:
+			result, execErr = dockerstats.StopContainer(cmd.ContainerID)
 
 		default:
 			execErr = fmt.Errorf("unknown action: %s", cmd.Action)

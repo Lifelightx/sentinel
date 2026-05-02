@@ -3,6 +3,8 @@ package models
 const (
 	ActionLogs    = "logs"
 	ActionInspect = "inspect"
+	Restart 	  = "restart"
+	Stop 		  = "stop"
 )
 
 type CommandRequest struct{

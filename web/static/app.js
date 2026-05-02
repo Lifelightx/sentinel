@@ -351,6 +351,12 @@ function ContainerDetails({ container, onBack }) {
             <button class="action-btn" onClick=${() => runAction("inspect")}>
               Inspect
             </button>
+            <button class="action-btn" onClick=${() => runAction("restart")}>
+              Restart
+            </button>
+            <button class="action-btn" onClick=${() => runAction("stop")}>
+              Stop
+            </button>
           </div>
         </div>
       </div>
